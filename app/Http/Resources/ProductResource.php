@@ -63,6 +63,7 @@ class ProductResource extends JsonResource
             'category'              => ($this->category_id) ? new ProductCategoryResource( $this->category ) : null,
             'seller_table'          => $this->seller_table,
             'seller_id'             => $this->seller_id,
+            'entry_type'            => $this->entry_type,
             'seller'                => $seller,
             'added_datetime'        => $this->created_at,
             'adder_user_id'         => $this->adder_user_id,
@@ -83,7 +84,7 @@ class ProductResource extends JsonResource
             'pinning'               => [
                 'favourite'         => $auth_user ? Pin::where([ 'item_table' => 'products', 'item_id' => $this->id, 'pin_type' => 'favourite', 'adder_user_id' =>$auth_user->id ])->exists() : false,
                 'cart'              => $auth_user ? Pin::where([ 'item_table' => 'products', 'item_id' => $this->id, 'pin_type' => 'cart', 'adder_user_id' =>$auth_user->id ])->exists() : false,
-                'order'             => $auth_user ? Order::where([ 'product_id' => $this->id, 'placer_user_id' =>$auth_user->id ])->exists() : false,
+                'order'             => $auth_user ? Order::where([ 'product_id' => $this->id, 'placer_user_id' =>$auth_user->id ])->whereNotIn('status',['cancelled'])->exists() : false,
             ],
         ];
     }

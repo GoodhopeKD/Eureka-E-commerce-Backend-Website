@@ -43,9 +43,13 @@ class ConnectInstanceController extends Controller
             'request_location' => ['required'],
         ]);
 
-        $app_access_token = preg_replace('/[^a-zA-Z0-9\']/', '', Hash::make(Str::random(32)) );
+        function generate_app_access_token(){
+            return substr(preg_replace('/[^a-zA-Z0-9\']/', '', Hash::make(Str::random(32)) ),6,16);
+        }
+
+        $app_access_token = generate_app_access_token();
         while ( ConnectInstance::where( 'app_access_token', $app_access_token )->exists() ){
-            $app_access_token = preg_replace('/[^a-zA-Z0-9\']/', '', Hash::make(Str::random(32)) );
+            $app_access_token = generate_app_access_token();
         }
         
         $validated_data['app_access_token'] = $app_access_token;

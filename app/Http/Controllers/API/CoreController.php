@@ -34,7 +34,8 @@ class CoreController extends Controller
             'connect_instance' => null,
             'products_structured_collection' => ( new ProductController )->structured_collection()->original,
             'datalists_collection' => ( new CoreController )->datalists()->original,
-            'stores_resource_collection' => ( new StoreController )->index()->response()->getData(true),
+            //'stores_resource_collection' => ( new StoreController )->index()->response()->getData(true),
+            'stores_home_list' => ( new StoreController )->home_collection()->original,
         ];
 
         $connect_instance_data = $request->connect_instance;

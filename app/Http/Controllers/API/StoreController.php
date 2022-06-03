@@ -23,17 +23,32 @@ class StoreController extends Controller
         $action_type = isset( request()->route()->getAction()['action_type'] ) ? request()->route()->getAction()['action_type'] : 'all';
 
         if ( $action_type === "all" ){
-            $result = Store::paginate();
+            $result = Store::where(['status'=>'active'])->paginate();
         }
 
         if ( $action_type === "search" && !is_null($query_string) ){
             $result = Store::where( 'name' , 'LIKE' , '%'.$query_string.'%' )
+                    ->where(['status'=>'active'])
                     ->orWhere( 'description' , 'LIKE' , '%'.$query_string.'%' )
                     ->orWhere( 'wilaya' , 'LIKE' , '%'.$query_string.'%' )
                     ->paginate();
         }
 
         return ($result) ? new StoreResourceCollection( $result ) : null;
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function home_collection()
+    {
+        $response = json_decode((new StoreResourceCollection(
+            Store::where(['status'=>'active'])->paginate(5)
+        ))->toJson(),true)['data'];
+
+        return response()->json($response);
     }
 
     /**

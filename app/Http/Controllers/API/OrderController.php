@@ -30,16 +30,16 @@ class OrderController extends Controller
         $action_type = request()->route()->getAction()['action_type'];
 
         if ( $action_type === "all" ){
-            $result = Order::orderBy('created_at','DESC')->paginate();
+            $result = Order::whereNotIn('visible_to_admin',[0])->orderBy('created_at','DESC')->paginate();
         }
 
         if ( $action_type === "received" && is_numeric($entity_id) ){
             $seller_table = request()->segments()[env('API_DOMAIN')?1:2];
-            $result = Order::where(['seller_table'=>$seller_table,'seller_id'=>$entity_id])->paginate();
+            $result = Order::where(['seller_table'=>$seller_table,'seller_id'=>$entity_id])->whereNotIn('visible_to_seller',[0])->orderBy('created_at','DESC')->paginate();
         }
 
         if ( $action_type === "placed" && is_numeric($entity_id) ){
-            $result = Order::where('placer_user_id',$entity_id)->paginate();
+            $result = Order::where('placer_user_id',$entity_id)->whereNotIn('visible_to_placer',[0])->orderBy('created_at','DESC')->paginate();
         }
 
         return ($result) ? new OrderResourceCollection( $result ) : null;
@@ -126,7 +126,7 @@ class OrderController extends Controller
             }
         }
 
-        if ($product->entry_type=='product_and_or_service' && is_numeric($product->stock_available)  && $product->stock_available > 0){
+        if ($product->entry_type=='product_and_or_service' && $product->stock_available > 0){
             $product->update(['stock_available' => $product->stock_available-1 ]);
         }
 
@@ -212,6 +212,16 @@ class OrderController extends Controller
 
                 case 'completed':
                     $validated_data['completed_datetime'] = now()->toDateTimeString();
+                    break;
+
+                case 'cancelled':
+                    $product = Product::find($order->product_id);
+                    if ( ( $product->entry_type=='product' ) || ( $product->entry_type=='product_and_or_service' && $product->stock_available > 0 )){
+                        $product->update(['stock_available' => $product->stock_available+1 ]);
+                        if ($product->status=='unavailable'){
+                            $product->update(['status' => 'available' ]);
+                        }
+                    }
                     break;
                 
                 default:

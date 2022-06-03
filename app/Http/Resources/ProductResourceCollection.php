@@ -52,7 +52,7 @@ class ProductResourceCollection extends ResourceCollection
                     'pinning'               => [
                         'favourite'         => $auth_user ? Pin::where([ 'item_table' => 'products', 'item_id' => $_this->id, 'pin_type' => 'favourite', 'adder_user_id' =>$auth_user->id ])->exists() : false,
                         'cart'              => $auth_user ? Pin::where([ 'item_table' => 'products', 'item_id' => $_this->id, 'pin_type' => 'cart', 'adder_user_id' =>$auth_user->id ])->exists() : false,
-                        'order'             => $auth_user ? Order::where([ 'product_id' => $_this->id, 'placer_user_id' =>$auth_user->id ])->exists() : false,
+                        'order'             => $auth_user ? Order::where([ 'product_id' => $_this->id, 'placer_user_id' =>$auth_user->id ])->whereNotIn('status',['cancelled'])->exists() : false,
                     ],
                 ];
             }),

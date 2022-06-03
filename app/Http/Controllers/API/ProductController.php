@@ -37,9 +37,14 @@ class ProductController extends Controller
         $result = null;
         $action_type = request()->route()->getAction()['action_type'];
 
-        if ( $action_type === "from_seller" && is_numeric($param_1) ){
+        if ( $action_type === "from_seller_available" && is_numeric($param_1) ){
             $seller_table = request()->segments()[env('API_DOMAIN')?1:2];
             $result = Product::where(['status'=>'available','seller_table'=>$seller_table,'seller_id'=>$param_1])->orderByDesc('updated_at')->paginate();
+        }
+
+        if ( $action_type === "from_seller_all" && is_numeric($param_1) ){
+            $seller_table = request()->segments()[env('API_DOMAIN')?1:2];
+            $result = Product::where(['seller_table'=>$seller_table,'seller_id'=>$param_1])->orderByDesc('updated_at')->paginate();
         }
 
         if ( $action_type === "from_location" && $param_1 ){
@@ -48,6 +53,17 @@ class ProductController extends Controller
 
         if ( $action_type === "pending_action" ){
             $result = Product::where(['status'=>'pending_confirmation'])->orWhere(['status'=>'suspended'])->orderBy('updated_at','ASC')->paginate();
+        }
+
+        if ( $action_type === "popular" ){
+            $result = Product::where(['status'=>'available'])
+            ->withCount(["log_items" => function($query){
+                $query
+                ->where('log_items.action', 'product_viewed')
+                ->whereDate('created_at', Carbon::today());
+            }])
+            ->orderByDesc('log_items_count')
+            ->paginate();
         }
 
         if ( $action_type === "all" ){
@@ -209,7 +225,7 @@ class ProductController extends Controller
                 ->whereDate('created_at', Carbon::today());
             }])
             ->orderByDesc('log_items_count')
-            ->paginate(10)
+            ->paginate(5)
         ))->toJson(),true)['data'];
 
         if (is_numeric($user_id))

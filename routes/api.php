@@ -117,7 +117,8 @@ Route::group([ 'namespace' => 'API', 'prefix' => '{app_access_token}' ], functio
 
     // User Market Products
     // index, store, update, destroy
-    Route::get('users/{seller_id}/seller_products',['uses'=>'ProductController@index','action_type'=>'from_seller'])->name('users.seller_products.index');
+    Route::get('users/{seller_id}/seller_products/available',['uses'=>'ProductController@index','action_type'=>'from_seller_available'])->name('users.seller_products.index');
+    Route::get('users/{seller_id}/seller_products/all',['uses'=>'ProductController@index','action_type'=>'from_seller_all'])->name('users.seller_products.index');
     Route::apiResource('users/{seller_id}/seller_products','ProductController',['middleware'=>'auth:api'])->only(['store','update','destroy'])->parameter('seller_products','id')->names('users.seller_products');
     Route::post('users/{seller_id}/seller_products/upload_images',['middleware'=>'auth:api','uses'=>'ImageController@upload','upload_dir_name'=>'products-images'])->name('users.seller_products.upload_images');
 
@@ -178,7 +179,8 @@ Route::group([ 'namespace' => 'API', 'prefix' => '{app_access_token}' ], functio
 
     // Store Products
     // index, store, update, destroy
-    Route::get('stores/{seller_id}/products',['uses'=>'ProductController@index','action_type'=>'from_seller'])->name('stores.products.index');
+    Route::get('stores/{seller_id}/products/available',['uses'=>'ProductController@index','action_type'=>'from_seller_available'])->name('stores.products.index');
+    Route::get('stores/{seller_id}/products/all',['uses'=>'ProductController@index','action_type'=>'from_seller_all'])->name('stores.products.index');
     Route::apiResource('stores/{seller_id}/products','ProductController',['middleware'=>'auth:api'])->only(['store','update','destroy'])->parameter('products','id')->names('stores.products');
     Route::post('stores/{seller_id}/products/upload_images',['middleware'=>'auth:api','uses'=>'ImageController@upload','upload_dir_name'=>'products-images'])->name('stores.products.upload_images');
 
@@ -251,6 +253,7 @@ Route::group([ 'namespace' => 'API', 'prefix' => '{app_access_token}' ], functio
 
     // Product List routes
     Route::get('products/all',['uses'=>'ProductController@index','action_type'=>'all'])->name('products.index');
+    Route::get('products/popular',['uses'=>'ProductController@index','action_type'=>'popular'])->name('products.index');
     Route::get('products/from_location/{location_name}',['uses'=>'ProductController@index','action_type'=>'from_location'])->name('products.index');
     Route::get('products/structured_collection/{user_id?}','ProductController@structured_collection')->name('products.structured_collection');
     Route::get('products/category/{category_id}','ProductController@category')->name('products.category');
